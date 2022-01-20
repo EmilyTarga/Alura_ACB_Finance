@@ -1,5 +1,6 @@
-<img src="./media/ACB_Finance.png" alt="ACB Logo" width="200px" align="center"/>
-<img src="./media/AluraChallengeLogo.svg" alt="ACB Logo" width="200px" align="center"/>
+<img src="./media/ACB_Finance.png" alt="ACB Logo" width="200px" align="left"/>
+<img src="./media/AluraChallengeLogo.svg" alt="ACB Logo" width="200px" align="right"/>
+
 <hr>
 
 <p align="center">
