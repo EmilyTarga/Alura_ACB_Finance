@@ -1,76 +1,99 @@
 const express = require("express");
 const router = express.Router();
-const moment = require("moment");
 
 const Receita = require("../models/receita.model");
-const Mensal = require("../controlls/mensal");
-31415;
+const ValidacaoDuplicado = require("../controlls/ValidacaoDuplicado");
+const Requisicao = require("../controlls/Requisicao");
 
-router
-  .get("/", async (req, res) => {
-    try {
-      const receitas = await Receita.find({}, "descricao valor data");
-      res.json(receitas);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  })
-  .post("/", async (req, res) => {
-    const descricao = req.body.descricao;
-    const valor = req.body.valor;
-    const data = moment(req.body.data, "DD/MM/YYYY").format("DD/MM/YYYY");
+router.get("/", async (req, res) => {
+  try {
+    const receitas = await Receita.find({}, "descricao valor data");
+    res.setHeader("Content-Type", "application/json");
+    res.end("Listagem de receitas: " + JSON.stringify(receitas));
+  } catch (err) {
+    res.status(500).json("Erro: " + err);
+  }
+});
 
-    Mensal(descricao, data, Receita)
-      .then(function (value) {
-        if (value) {
-          const newReceita = new Receita({ descricao, valor, data });
+router.post("/", async (req, res) => {
+  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
 
-          newReceita
-            .save()
-            .then(() => res.json("Receita Adicionada"))
-            .catch((err) => res.status(400).json("Error: " + err));
-        } else {
-          throw "Você já teve essa Receita nesse mês... ";
-        }
-      })
-      .catch((err) => res.status(400).json("Error: " + err));
-  });
+  try {
+    const ehValido = await ValidacaoDuplicado(dados, Receita);
 
-router
-  .get("/:id", (req, res) => {
-    Receita.findById(req.params.id, "valor descricao data")
-      .then((receita) => res.json(receita))
-      .catch((err) => res.status(400).json("Error: " + err));
-  })
-  .delete("/:id", async (req, res) => {
-    Receita.findByIdAndDelete(req.params.id)
-      .then(() => {
-        res.json("Receita Deletada");
-      })
-      .catch((err) => res.status(400).json("Error: " + err));
-  })
-  .put("/:id", async (req, res) => {
-    const descricao = req.body.descricao;
-    const valor = req.body.valor;
-    const data = req.body.data;
+    if (ehValido) {
+      const novaReceita = await new Receita(dados).save();
 
-    console.log(descricao, data);
-
-    Mensal(descricao, data, Receita).then(function (value) {
-      if (value) {
-        Receita.findByIdAndUpdate(req.params.id, {
-          descricao: descricao,
-          valor: valor,
-          data: data,
-        })
-          .then(() => res.json("Receita Atualizada"))
-          .catch((err) => res.status(500).json("Error: " + err));
-      } else {
-        res.json(
-          "Você já teve essa Receita nesse mês... Atualize para outro mês"
+      try {
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          `Receita ${novaReceita.descricao} adicionada: ` +
+            JSON.stringify(novaReceita)
         );
+      } catch (err) {
+        res.status(500).json("Erro: " + err);
       }
-    });
-  });
+    } else {
+      throw `A receita ${dados.descricao} já foi adicionada neste mês `;
+    }
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const detalhes = await Receita.findById(
+      req.params.id,
+      "descricao valor data"
+    );
+    res.setHeader("Content-Type", "application/json");
+    res.end(
+      `Detalhes sobre a receita ${detalhes.descricao}: ` +
+        JSON.stringify(detalhes)
+    );
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const deletar = await Receita.findByIdAndDelete(req.params.id);
+    res.setHeader("Content-Type", "application/json");
+    res.end(`A receita ${deletar.descricao} foi deletada`);
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
+
+  try {
+    const ehValido = await ValidacaoDuplicado(dados, Receita);
+
+    if (ehValido) {
+      try {
+        const atualizar = await Receita.findOneAndUpdate(
+          { _id: req.params.id },
+          dados,
+          { runValidators: true }
+        );
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          `A receita ${atualizar.descricao} foi atualizada: ` +
+            JSON.stringify(atualizar)
+        );
+      } catch (err) {
+        res.status(400).json("Erro: " + err);
+      }
+    } else {
+      throw `A receita ${dados.descricao} já existe neste mês, tente outro.`;
+    }
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
 
 module.exports = router;

@@ -6,6 +6,7 @@ const receitaSchema = new Schema({
   descricao: {
     type: String,
     required: true,
+    minLength: 3,
   },
   valor: {
     type: Number,
@@ -13,7 +14,7 @@ const receitaSchema = new Schema({
     required: [true, "Valor da receita é obrigatório"],
   },
   data: {
-    type: String,
+    type: Date,
     required: [true, "A Data da receita é obrigatória"],
   },
 });
