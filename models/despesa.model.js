@@ -6,6 +6,7 @@ const despesaSchema = new Schema({
   descricao: {
     type: String,
     required: true,
+    minLength: 3,
   },
   valor: {
     type: Number,
@@ -13,11 +14,9 @@ const despesaSchema = new Schema({
     required: [true, "Valor da despesa é obrigátorio"],
   },
   data: {
-    type: String,
+    type: Date,
     required: [true, "A Data da receira é obrigatória"],
   },
 });
 
-const despesa = mongoose.model("despesaModel", despesaSchema);
-
-module.exports = despesa;
+module.exports = mongoose.model("despesaModel", despesaSchema);

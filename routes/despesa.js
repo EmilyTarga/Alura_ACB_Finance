@@ -1,73 +1,99 @@
 const express = require("express");
 const router = express.Router();
-const moment = require("moment");
 
 const Despesa = require("../models/despesa.model");
-const Mensal = require("../controlls/mensal");
+const ValidacaoDuplicado = require("../controlls/ValidacaoDuplicado");
+const Requisicao = require("../controlls/Requisicao");
 
-router
-  .get("/", async (req, res) => {
-    try {
-      const despesa = await Despesa.find({}, "descricao valor data");
-      res.json(despesa);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
-    }
-  })
-  .post("/", async (req, res) => {
-    const descricao = req.body.descricao;
-    const valor = req.body.valor;
-    const data = moment(req.body.data, "DD/MM/YYYY").format("DD/MM/YYYY");
+router.get("/", async (req, res) => {
+  try {
+    const despesas = await Despesa.find({}, "descricao valor data");
+    res.setHeader("Content-Type", "application/json");
+    res.end("Listagem de despesas: " + JSON.stringify(despesas));
+  } catch (err) {
+    res.status(500).json("Erro: " + err);
+  }
+});
 
-    Mensal(descricao, data, Despesa)
-      .then(function (value) {
-        if (value) {
-          const newDespesa = new Despesa({ descricao, valor, data });
+router.post("/", async (req, res) => {
+  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
 
-          newDespesa
-            .save()
-            .then(() => res.json("Despesa Adicionada"))
-            .catch((err) => res.status(400).json("Error: " + err));
-        } else {
-          throw "Você já teve essa Despesa nesse mês...";
-        }
-      })
-      .catch((err) => res.status(400).json("Error: " + err));
-  });
+  try {
+    const ehValido = await ValidacaoDuplicado(dados, Despesa);
 
-router
-  .get("/:id", (req, res) => {
-    Despesa.findById(req.params.id, "valor descricao data")
-      .then((despesa) => res.json(despesa))
-      .catch((err) => res.status(400).json("Error: " + err));
-  })
-  .delete("/:id", (req, res) => {
-    Despesa.findByIdAndDelete(req.params.id)
-      .then(() => res.json("Despesa Deletada"))
-      .catch((err) => res.status(400).json("Error: " + err));
-  })
-  .put("/:id", async (req, res) => {
-    const descricao = req.body.descricao;
-    const valor = req.body.valor;
-    const data = req.body.data;
+    if (ehValido) {
+      const novaDespesa = await new Despesa(dados).save();
 
-    console.log(descricao, data);
-
-    Mensal(descricao, data, Despesa).then(function (value) {
-      if (value) {
-        Despesa.findByIdAndUpdate(req.params.id, {
-          descricao: descricao,
-          valor: valor,
-          data: data,
-        })
-          .then(() => res.json("Despesa Atualizada"))
-          .catch((err) => res.status(400).json("Error: " + err));
-      } else {
-        res.json(
-          "Você já teve essa Despesa nesse mês... Atualize para outro mês"
+      try {
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          `Despesa ${novaDespesa.descricao} adicionada: ` +
+            JSON.stringify(novaDespesa)
         );
+      } catch (err) {
+        res.status(500).json("Erro: " + err);
       }
-    });
-  });
+    } else {
+      throw `A despesa ${dados.descricao} já foi adicionada neste mês `;
+    }
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const detalhes = await Despesa.findById(
+      req.params.id,
+      "valor descricao data"
+    );
+    res.setHeader("Content-Type", "application/json");
+    res.end(
+      `Detalhes sobre a receita ${detalhes.descricao}: ` +
+        JSON.stringify(detalhes)
+    );
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  const deletar = await Despesa.findByIdAndDelete(req.params.id);
+  try {
+    res.setHeader("Content-Type", "application/json");
+    res.end(`A despesa ${deletar.descricao} foi deletada`);
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
+
+router.put("/:id", async (req, res) => {
+  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
+
+  try {
+    const ehValido = await ValidacaoDuplicado(dados, Despesa);
+
+    if (ehValido) {
+      try {
+        const atualizar = await Despesa.findOneAndUpdate(
+          { _id: req.params.id },
+          dados,
+          { runValidators: true }
+        );
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          `A despesa ${atualizar.descricao} foi atualizada: ` +
+            JSON.stringify(atualizar)
+        );
+      } catch (err) {
+        res.status(400).json("Erro: " + err);
+      }
+    } else {
+      throw `A despesa ${dados.descricao} já existe neste mês, tente outro.`;
+    }
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
+  }
+});
 
 module.exports = router;
