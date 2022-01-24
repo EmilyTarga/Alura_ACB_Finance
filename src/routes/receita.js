@@ -13,4 +13,6 @@ router.delete("/:id", receitaController.receita_deletada);
 
 router.put("/:id", receitaController.receita_atualizada);
 
+router.get("/:ano/:mes", receitaController.receita_anoMes);
+
 module.exports = router;

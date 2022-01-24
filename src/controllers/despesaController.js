@@ -25,6 +25,21 @@ exports.despesa_lista = async function (req, res) {
   }
 };
 
+exports.despesa_anoMes = async function (req, res) {
+  const ano = req.params.ano;
+  const mes = req.params.mes;
+
+  try {
+    const despesas = await Despesa.find(
+      { data: { $gte: `${ano}-${mes}-01`, $lte: `${ano}-${mes}-31` } },
+      "descricao valor data categoria"
+    );
+    res.json(despesas);
+  } catch (err) {
+    res.status(500).json("Erro: " + err);
+  }
+};
+
 exports.despesa_nova = async function (req, res) {
   const dados = Requisicao(
     req.body.descricao,

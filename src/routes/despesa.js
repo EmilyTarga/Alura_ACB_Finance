@@ -13,4 +13,6 @@ router.delete("/:id", despesaController.despesa_deletada);
 
 router.put("/:id", despesaController.despesa_atualizada);
 
+router.get("/:ano/:mes", despesaController.despesa_anoMes);
+
 module.exports = router;

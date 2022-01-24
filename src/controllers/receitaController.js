@@ -25,6 +25,21 @@ exports.receita_lista = async function (req, res) {
   }
 };
 
+exports.receita_anoMes = async function (req, res) {
+  const ano = req.params.ano;
+  const mes = req.params.mes;
+
+  try {
+    const receitas = await Receita.find(
+      { data: { $gte: `${ano}-${mes}-01`, $lte: `${ano}-${mes}-31` } },
+      "descricao valor data categoria"
+    );
+    res.json(receitas);
+  } catch (err) {
+    res.status(500).json("Erro: " + err);
+  }
+};
+
 exports.receita_nova = async function (req, res) {
   const dados = Requisicao(
     req.body.descricao,
