@@ -19,7 +19,7 @@ db.once("open", () => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("ACB - Finance");
 });
 
 const receitaRouter = require("./routes/receita");

@@ -8,6 +8,7 @@ const modelTest = {
   descricao: "compra",
   valor: 321.5,
   data: "05/05/2010",
+  categoria: "Alimentação",
 };
 
 describe("POST  /receitas /despesas", () => {
