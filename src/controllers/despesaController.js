@@ -1,18 +1,37 @@
 const Despesa = require("../models/despesa.model");
-const ValidacaoDuplicado = require("../controllers/ValidacaoDuplicado");
+const ValidacaoDuplicado = require("./Validacao");
 const Requisicao = require("./Requisicao");
 
 exports.despesa_lista = async function (req, res) {
-  try {
-    const despesas = await Despesa.find({}, "descricao valor data");
-    res.json(despesas);
-  } catch (err) {
-    res.status(500).json("Erro: " + err);
+  const busca = req.query.descricao;
+
+  if (busca == undefined) {
+    try {
+      const despesas = await Despesa.find({}, "descricao valor data categoria");
+      res.json(despesas);
+    } catch (err) {
+      res.status(400).json("Erro: " + err);
+    }
+  } else {
+    try {
+      const despesas = await Despesa.find(
+        { descricao: busca },
+        "descricao valor data categoria"
+      );
+      res.json(despesas);
+    } catch (err) {
+      res.status(400).json("Erro: " + err);
+    }
   }
 };
 
 exports.despesa_nova = async function (req, res) {
-  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
+  const dados = Requisicao(
+    req.body.descricao,
+    req.body.valor,
+    req.body.data,
+    req.body.categoria
+  );
 
   try {
     const ehValido = await ValidacaoDuplicado(dados, Despesa);
@@ -37,7 +56,7 @@ exports.despesa_detalhes = async function (req, res) {
   try {
     const detalhes = await Despesa.findById(
       req.params.id,
-      "valor descricao data"
+      "valor descricao data categoria"
     );
     res.json(detalhes);
   } catch (err) {
@@ -55,7 +74,12 @@ exports.despesa_deletada = async function (req, res) {
 };
 
 exports.despesa_atualizada = async function (req, res) {
-  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
+  const dados = Requisicao(
+    req.body.descricao,
+    req.body.valor,
+    req.body.data,
+    req.body.categoria
+  );
 
   try {
     const ehValido = await ValidacaoDuplicado(dados, Despesa);

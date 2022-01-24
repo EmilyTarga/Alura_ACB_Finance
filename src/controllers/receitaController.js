@@ -1,18 +1,37 @@
 const Receita = require("../models/receita.model");
-const ValidacaoDuplicado = require("../controllers/ValidacaoDuplicado");
+const ValidacaoDuplicado = require("./Validacao");
 const Requisicao = require("./Requisicao");
 
 exports.receita_lista = async function (req, res) {
-  try {
-    const receitas = await Receita.find({}, "descricao valor data");
-    res.json(receitas);
-  } catch (err) {
-    res.status(500).json("Erro: " + err);
+  const busca = req.query.descricao;
+
+  if (busca == undefined) {
+    try {
+      const receitas = await Receita.find({}, "descricao valor data categoria");
+      res.json(receitas);
+    } catch (err) {
+      res.status(500).json("Erro: " + err);
+    }
+  } else {
+    try {
+      const receita = await Receita.find(
+        { descricao: busca },
+        "descricao valor data categoria"
+      );
+      res.json(receita);
+    } catch (err) {
+      res.status(400).json("Erro: " + err);
+    }
   }
 };
 
 exports.receita_nova = async function (req, res) {
-  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
+  const dados = Requisicao(
+    req.body.descricao,
+    req.body.valor,
+    req.body.data,
+    req.body.categoria
+  );
 
   try {
     const ehValido = await ValidacaoDuplicado(dados, Receita);
@@ -37,7 +56,7 @@ exports.receita_detalhes = async function (req, res) {
   try {
     const detalhes = await Receita.findById(
       req.params.id,
-      "descricao valor data"
+      "descricao valor data categoria"
     );
     res.json(detalhes);
   } catch (err) {
@@ -55,7 +74,12 @@ exports.receita_deletada = async function (req, res) {
 };
 
 exports.receita_atualizada = async function (req, res) {
-  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
+  const dados = Requisicao(
+    req.body.descricao,
+    req.body.valor,
+    req.body.data,
+    req.body.categoria
+  );
 
   try {
     const ehValido = await ValidacaoDuplicado(dados, Receita);
