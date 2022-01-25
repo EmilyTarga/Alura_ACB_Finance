@@ -1,4 +1,4 @@
-const moment = require("moment");
+const { DateTime } = require("luxon");
 
 module.exports = async function ValidacaoDuplicado(dados, Modelo) {
   const modelo = await Modelo.find({}, "descricao data categoria");
@@ -7,15 +7,8 @@ module.exports = async function ValidacaoDuplicado(dados, Modelo) {
     .map(
       (modelo) =>
         modelo.descricao == dados.descricao &&
-        moment(modelo.data, "DD MM YYYY").format("MM YYYY") ==
-          moment(dados.data, "DD MM YYYY").format("MM YYYY") &&
-        modelo.categoria == dados.categoria
+        DateTime.fromJSDate(modelo.data).toFormat("yyyy MM") ==
+          DateTime.fromISO(dados.data).toFormat("yyyy MM")
     )
     .every((entry) => entry == false);
 };
-
-// module.exports = function validacaoCategoria(dados, Categorias) {
-//   return Categorias.map((categoria) => dados != categoria && dados != "").every(
-//     (entry) => entry == false
-//   );
-// };

@@ -17,20 +17,6 @@ const receitaSchema = new Schema({
     type: Date,
     required: [true, "A Data da receita é obrigatória"],
   },
-  categoria: {
-    type: String,
-    enum: [
-      "Alimentação",
-      "Saúde",
-      "Moradia",
-      "Transporte",
-      "Educação",
-      "Lazer",
-      "Imprevistos",
-      "Outras",
-    ],
-    default: "Outras",
-  },
 });
 
 module.exports = mongoose.model("receitaModel", receitaSchema);

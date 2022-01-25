@@ -7,7 +7,7 @@ exports.receita_lista = async function (req, res) {
 
   if (busca == undefined) {
     try {
-      const receitas = await Receita.find({}, "descricao valor data categoria");
+      const receitas = await Receita.find({}, "descricao valor data ");
       res.json(receitas);
     } catch (err) {
       res.status(500).json("Erro: " + err);
@@ -16,7 +16,7 @@ exports.receita_lista = async function (req, res) {
     try {
       const receita = await Receita.find(
         { descricao: busca },
-        "descricao valor data categoria"
+        "descricao valor data "
       );
       res.json(receita);
     } catch (err) {
@@ -32,7 +32,7 @@ exports.receita_anoMes = async function (req, res) {
   try {
     const receitas = await Receita.find(
       { data: { $gte: `${ano}-${mes}-01`, $lte: `${ano}-${mes}-31` } },
-      "descricao valor data categoria"
+      "descricao valor data "
     );
     res.json(receitas);
   } catch (err) {
@@ -41,12 +41,7 @@ exports.receita_anoMes = async function (req, res) {
 };
 
 exports.receita_nova = async function (req, res) {
-  const dados = Requisicao(
-    req.body.descricao,
-    req.body.valor,
-    req.body.data,
-    req.body.categoria
-  );
+  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
 
   try {
     const ehValido = await ValidacaoDuplicado(dados, Receita);
@@ -71,7 +66,7 @@ exports.receita_detalhes = async function (req, res) {
   try {
     const detalhes = await Receita.findById(
       req.params.id,
-      "descricao valor data categoria"
+      "descricao valor data "
     );
     res.json(detalhes);
   } catch (err) {
@@ -89,12 +84,7 @@ exports.receita_deletada = async function (req, res) {
 };
 
 exports.receita_atualizada = async function (req, res) {
-  const dados = Requisicao(
-    req.body.descricao,
-    req.body.valor,
-    req.body.data,
-    req.body.categoria
-  );
+  const dados = Requisicao(req.body.descricao, req.body.valor, req.body.data);
 
   try {
     const ehValido = await ValidacaoDuplicado(dados, Receita);

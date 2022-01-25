@@ -24,9 +24,11 @@ app.get("/", (req, res) => {
 
 const receitaRouter = require("./routes/receita");
 const despesaRouter = require("./routes/despesa");
+const resumoRouter = require("./routes/resumo");
 
 app.use("/receitas", receitaRouter);
 app.use("/despesas", despesaRouter);
+app.use("/resumo", resumoRouter);
 
 app.listen(port, () => {
   console.log(`Example App is listening at http://localhost:${port}`);
