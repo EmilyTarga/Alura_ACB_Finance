@@ -137,7 +137,3 @@ describe("Testes das funcionalidades das Receitas", () => {
     });
   });
 });
-
-after(async () => {
-  const deleta = await Receita.deleteMany({});
-});

@@ -174,7 +174,3 @@ describe("Testes das funcionalidades das Despesas", () => {
     });
   });
 });
-
-after(async () => {
-  const deleta = await Despesa.deleteMany({});
-});
