@@ -2,14 +2,6 @@ const app = require("../server");
 const request = require("supertest");
 const expect = require("chai").expect;
 
-const Receita = require("../models/receita.model");
-const Despesa = require("../models/despesa.model");
-
-after((done) => {
-  Receita.deleteMany({});
-  Despesa.deleteMany({}, done);
-});
-
 describe("Testes das funcionalidades do Resumo", () => {
   describe("GET /resumo/:ano/:mes", () => {
     it("retorna o resumo do mês", async () => {

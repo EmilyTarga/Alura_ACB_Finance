@@ -4,15 +4,16 @@ const Requisicao = require("./Requisicao");
 
 exports.receita_lista = async function (req, res) {
   const busca = req.query.descricao;
+  const pagina = req.query.page;
 
-  if (busca == undefined) {
+  if (busca == undefined && pagina == undefined) {
     try {
       const receitas = await Receita.find({}, "descricao valor data ");
       res.json(receitas);
     } catch (err) {
       res.status(500).json("Erro: " + err);
     }
-  } else {
+  } else if (busca !== undefined && pagina == undefined) {
     try {
       const receita = await Receita.find(
         { descricao: busca },
@@ -22,6 +23,30 @@ exports.receita_lista = async function (req, res) {
     } catch (err) {
       res.status(400).json("Erro: " + err);
     }
+  } else {
+    try {
+      const receita = await Receita.find({}, "descricao valor data ", {
+        skip: (pagina - 1) * 5,
+        limit: 5,
+      });
+      res.json(receita);
+    } catch (err) {
+      res.status(400).json("Erro: " + err);
+    }
+  }
+};
+
+exports.receita_lista_pagina = async function (req, res) {
+  const pagina = req.query.page;
+
+  try {
+    const receita = await Receita.find({}, "descricao valor data ", {
+      skip: (pagina - 1) * 5,
+      limit: 5,
+    });
+    res.json(receita);
+  } catch (err) {
+    res.status(400).json("Erro: " + err);
   }
 };
 

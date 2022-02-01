@@ -4,10 +4,6 @@ const expect = require("chai").expect;
 
 const Despesa = require("../models/despesa.model");
 
-before((done) => {
-  Despesa.deleteMany({}, done);
-});
-
 describe("Testes das funcionalidades das Despesas", () => {
   describe("POST /despesas", () => {
     it("cadastra uma nova despesa", async () => {

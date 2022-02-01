@@ -4,10 +4,6 @@ const expect = require("chai").expect;
 
 const Receita = require("../models/receita.model");
 
-before((done) => {
-  Receita.deleteMany({}, done);
-});
-
 describe("Testes das funcionalidades das Receitas", () => {
   describe("POST /receitas", () => {
     it("cadastra uma nova receita", async () => {
