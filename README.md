@@ -2,7 +2,10 @@
 <img src="./media/AluraChallengeLogo.svg" alt="ACB Logo" width="200px" align="right"/>
 
 <hr>
-<hr>
+
+<p align="center">
+   <img src="http://img.shields.io/static/v1?label=STATUS&message=FINALIZADO&color=RED&style=for-the-badge"/>
+</p>
 
 
 ### Tópicos
