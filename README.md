@@ -2,6 +2,8 @@
 <img src="./media/AluraChallengeLogo.svg" alt="ACB Logo" width="200px" align="right"/>
 
 <hr>
+<hr>
+
 
 ### Tópicos
 
